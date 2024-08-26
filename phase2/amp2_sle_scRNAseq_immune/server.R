@@ -44,6 +44,13 @@ sc5meta = readRDS("sc5meta.rds")
 
 
 
+sc6conf = readRDS("sc6conf.rds")
+sc6def  = readRDS("sc6def.rds")
+sc6gene = readRDS("sc6gene.rds")
+sc6meta = readRDS("sc6meta.rds")
+
+
+
 ### Useful stuff 
 # Colour palette 
 cList = list(c("grey85","#FFF7EC","#FEE8C8","#FDD49E","#FDBB84", 
@@ -3141,6 +3148,504 @@ output$sc5c2oup.png <- downloadHandler(
                         input$sc5d1sub1, input$sc5d1sub2, "sc5gexpr.h5", sc5gene, 
                         input$sc5d1scl, input$sc5d1row, input$sc5d1col, 
                         input$sc5d1cols, input$sc5d1fsz, save = TRUE) ) 
+  }) 
+   
+   
+   optCrt="{ option_create: function(data,escape) {return('<div class=\"create\"><strong>' + '</strong></div>');} }" 
+  updateSelectizeInput(session, "sc6a1inp2", choices = names(sc6gene), server = TRUE, 
+                       selected = sc6def$gene1, options = list( 
+                         maxOptions = 7, create = TRUE, persist = TRUE, render = I(optCrt))) 
+  updateSelectizeInput(session, "sc6a3inp1", choices = names(sc6gene), server = TRUE, 
+                       selected = sc6def$gene1, options = list( 
+                         maxOptions = 7, create = TRUE, persist = TRUE, render = I(optCrt))) 
+  updateSelectizeInput(session, "sc6a3inp2", choices = names(sc6gene), server = TRUE, 
+                       selected = sc6def$gene2, options = list( 
+                         maxOptions = 7, create = TRUE, persist = TRUE, render = I(optCrt))) 
+  updateSelectizeInput(session, "sc6b2inp1", choices = names(sc6gene), server = TRUE, 
+                       selected = sc6def$gene1, options = list( 
+                         maxOptions = 7, create = TRUE, persist = TRUE, render = I(optCrt))) 
+  updateSelectizeInput(session, "sc6b2inp2", choices = names(sc6gene), server = TRUE, 
+                       selected = sc6def$gene2, options = list( 
+                         maxOptions = 7, create = TRUE, persist = TRUE, render = I(optCrt))) 
+  updateSelectizeInput(session, "sc6c1inp2", server = TRUE, 
+                       choices = c(sc6conf[is.na(fID)]$UI,names(sc6gene)), 
+                       selected = sc6conf[is.na(fID)]$UI[1], options = list( 
+                         maxOptions = length(sc6conf[is.na(fID)]$UI) + 3, 
+                         create = TRUE, persist = TRUE, render = I(optCrt))) 
+ 
+ 
+  ### Plots for tab a1 
+  output$sc6a1sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6a1sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6a1sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6a1sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6a1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6a1sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6a1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6a1oup1 <- renderPlot({ 
+    scDRcell(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp1,  
+             input$sc6a1sub1, input$sc6a1sub2, 
+             input$sc6a1siz, input$sc6a1col1, input$sc6a1ord1, 
+             input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt, input$sc6a1lab1) 
+  }) 
+  output$sc6a1oup1.ui <- renderUI({ 
+    plotOutput("sc6a1oup1", height = pList[input$sc6a1psz]) 
+  }) 
+  output$sc6a1oup1.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a1drX,"_",input$sc6a1drY,"_",  
+                                   input$sc6a1inp1,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a1oup1.h, width = input$sc6a1oup1.w, useDingbats = FALSE, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp1,   
+                      input$sc6a1sub1, input$sc6a1sub2, 
+                      input$sc6a1siz, input$sc6a1col1, input$sc6a1ord1,  
+                      input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt, input$sc6a1lab1) ) 
+  }) 
+  output$sc6a1oup1.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a1drX,"_",input$sc6a1drY,"_",  
+                                   input$sc6a1inp1,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a1oup1.h, width = input$sc6a1oup1.w, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp1,   
+                      input$sc6a1sub1, input$sc6a1sub2, 
+                      input$sc6a1siz, input$sc6a1col1, input$sc6a1ord1,  
+                      input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt, input$sc6a1lab1) ) 
+  }) 
+  output$sc6a1.dt <- renderDataTable({ 
+    ggData = scDRnum(sc6conf, sc6meta, input$sc6a1inp1, input$sc6a1inp2, 
+                     input$sc6a1sub1, input$sc6a1sub2, 
+                     "sc6gexpr.h5", sc6gene, input$sc6a1splt) 
+    datatable(ggData, rownames = FALSE, extensions = "Buttons", 
+              options = list(pageLength = -1, dom = "tB", buttons = c("copy", "csv", "excel"))) %>% 
+      formatRound(columns = c("pctExpress"), digits = 2) 
+  }) 
+   
+  output$sc6a1oup2 <- renderPlot({ 
+    scDRgene(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp2,  
+             input$sc6a1sub1, input$sc6a1sub2, 
+             "sc6gexpr.h5", sc6gene, 
+             input$sc6a1siz, input$sc6a1col2, input$sc6a1ord2, 
+             input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt) 
+  }) 
+  output$sc6a1oup2.ui <- renderUI({ 
+    plotOutput("sc6a1oup2", height = pList[input$sc6a1psz]) 
+  }) 
+  output$sc6a1oup2.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a1drX,"_",input$sc6a1drY,"_",  
+                                   input$sc6a1inp2,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a1oup2.h, width = input$sc6a1oup2.w, useDingbats = FALSE, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp2,  
+                      input$sc6a1sub1, input$sc6a1sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a1siz, input$sc6a1col2, input$sc6a1ord2, 
+                      input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt) ) 
+  }) 
+  output$sc6a1oup2.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a1drX,"_",input$sc6a1drY,"_",  
+                                   input$sc6a1inp2,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a1oup2.h, width = input$sc6a1oup2.w, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a1drX, input$sc6a1drY, input$sc6a1inp2,  
+                      input$sc6a1sub1, input$sc6a1sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a1siz, input$sc6a1col2, input$sc6a1ord2, 
+                      input$sc6a1fsz, input$sc6a1asp, input$sc6a1txt) ) 
+  }) 
+   
+   
+  ### Plots for tab a2 
+  output$sc6a2sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6a2sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6a2sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6a2sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6a2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6a2sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6a2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6a2oup1 <- renderPlot({ 
+    scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp1,  
+             input$sc6a2sub1, input$sc6a2sub2, 
+             input$sc6a2siz, input$sc6a2col1, input$sc6a2ord1, 
+             input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab1) 
+  }) 
+  output$sc6a2oup1.ui <- renderUI({ 
+    plotOutput("sc6a2oup1", height = pList[input$sc6a2psz]) 
+  }) 
+  output$sc6a2oup1.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a2drX,"_",input$sc6a2drY,"_",  
+                                   input$sc6a2inp1,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a2oup1.h, width = input$sc6a2oup1.w, useDingbats = FALSE, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp1,   
+                      input$sc6a2sub1, input$sc6a2sub2, 
+                      input$sc6a2siz, input$sc6a2col1, input$sc6a2ord1,  
+                      input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab1) ) 
+  }) 
+  output$sc6a2oup1.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a2drX,"_",input$sc6a2drY,"_",  
+                                   input$sc6a2inp1,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a2oup1.h, width = input$sc6a2oup1.w, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp1,   
+                      input$sc6a2sub1, input$sc6a2sub2, 
+                      input$sc6a2siz, input$sc6a2col1, input$sc6a2ord1,  
+                      input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab1) ) 
+  }) 
+   
+  output$sc6a2oup2 <- renderPlot({ 
+    scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp2,  
+             input$sc6a2sub1, input$sc6a2sub2, 
+             input$sc6a2siz, input$sc6a2col2, input$sc6a2ord2, 
+             input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab2) 
+  }) 
+  output$sc6a2oup2.ui <- renderUI({ 
+    plotOutput("sc6a2oup2", height = pList[input$sc6a2psz]) 
+  }) 
+  output$sc6a2oup2.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a2drX,"_",input$sc6a2drY,"_",  
+                                   input$sc6a2inp2,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a2oup2.h, width = input$sc6a2oup2.w, useDingbats = FALSE, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp2,   
+                      input$sc6a2sub1, input$sc6a2sub2, 
+                      input$sc6a2siz, input$sc6a2col2, input$sc6a2ord2,  
+                      input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab2) ) 
+  }) 
+  output$sc6a2oup2.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a2drX,"_",input$sc6a2drY,"_",  
+                                   input$sc6a2inp2,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a2oup2.h, width = input$sc6a2oup2.w, 
+      plot = scDRcell(sc6conf, sc6meta, input$sc6a2drX, input$sc6a2drY, input$sc6a2inp2,   
+                      input$sc6a2sub1, input$sc6a2sub2, 
+                      input$sc6a2siz, input$sc6a2col2, input$sc6a2ord2,  
+                      input$sc6a2fsz, input$sc6a2asp, input$sc6a2txt, input$sc6a2lab2) ) 
+  }) 
+   
+   
+  ### Plots for tab a3 
+  output$sc6a3sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6a3sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6a3sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6a3sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6a3sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a3sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6a3sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6a3sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6a3sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6a3oup1 <- renderPlot({ 
+    scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp1,  
+             input$sc6a3sub1, input$sc6a3sub2, 
+             "sc6gexpr.h5", sc6gene, 
+             input$sc6a3siz, input$sc6a3col1, input$sc6a3ord1, 
+             input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) 
+  }) 
+  output$sc6a3oup1.ui <- renderUI({ 
+    plotOutput("sc6a3oup1", height = pList[input$sc6a3psz]) 
+  }) 
+  output$sc6a3oup1.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a3drX,"_",input$sc6a3drY,"_",  
+                                   input$sc6a3inp1,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a3oup1.h, width = input$sc6a3oup1.w, useDingbats = FALSE, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp1,  
+                      input$sc6a3sub1, input$sc6a3sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a3siz, input$sc6a3col1, input$sc6a3ord1, 
+                      input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) ) 
+  }) 
+  output$sc6a3oup1.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a3drX,"_",input$sc6a3drY,"_",  
+                                   input$sc6a3inp1,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a3oup1.h, width = input$sc6a3oup1.w, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp1,  
+                      input$sc6a3sub1, input$sc6a3sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a3siz, input$sc6a3col1, input$sc6a3ord1, 
+                      input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) ) 
+  }) 
+   
+  output$sc6a3oup2 <- renderPlot({ 
+    scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp2,  
+             input$sc6a3sub1, input$sc6a3sub2, 
+             "sc6gexpr.h5", sc6gene, 
+             input$sc6a3siz, input$sc6a3col2, input$sc6a3ord2, 
+             input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) 
+  }) 
+  output$sc6a3oup2.ui <- renderUI({ 
+    plotOutput("sc6a3oup2", height = pList[input$sc6a3psz]) 
+  }) 
+  output$sc6a3oup2.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a3drX,"_",input$sc6a3drY,"_",  
+                                   input$sc6a3inp2,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6a3oup2.h, width = input$sc6a3oup2.w, useDingbats = FALSE, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp2,  
+                      input$sc6a3sub1, input$sc6a3sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a3siz, input$sc6a3col2, input$sc6a3ord2, 
+                      input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) ) 
+  }) 
+  output$sc6a3oup2.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6a3drX,"_",input$sc6a3drY,"_",  
+                                   input$sc6a3inp2,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6a3oup2.h, width = input$sc6a3oup2.w, 
+      plot = scDRgene(sc6conf, sc6meta, input$sc6a3drX, input$sc6a3drY, input$sc6a3inp2,  
+                      input$sc6a3sub1, input$sc6a3sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6a3siz, input$sc6a3col2, input$sc6a3ord2, 
+                      input$sc6a3fsz, input$sc6a3asp, input$sc6a3txt) ) 
+  }) 
+     
+   
+  ### Plots for tab b2 
+  output$sc6b2sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6b2sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6b2sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6b2sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6b2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6b2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6b2sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6b2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6b2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6b2oup1 <- renderPlot({ 
+    scDRcoex(sc6conf, sc6meta, input$sc6b2drX, input$sc6b2drY,   
+             input$sc6b2inp1, input$sc6b2inp2, input$sc6b2sub1, input$sc6b2sub2, 
+             "sc6gexpr.h5", sc6gene, 
+             input$sc6b2siz, input$sc6b2col1, input$sc6b2ord1, 
+             input$sc6b2fsz, input$sc6b2asp, input$sc6b2txt) 
+  }) 
+  output$sc6b2oup1.ui <- renderUI({ 
+    plotOutput("sc6b2oup1", height = pList2[input$sc6b2psz]) 
+  }) 
+  output$sc6b2oup1.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6b2drX,"_",input$sc6b2drY,"_",  
+                                    input$sc6b2inp1,"_",input$sc6b2inp2,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6b2oup1.h, width = input$sc6b2oup1.w, useDingbats = FALSE, 
+      plot = scDRcoex(sc6conf, sc6meta, input$sc6b2drX, input$sc6b2drY,  
+                      input$sc6b2inp1, input$sc6b2inp2, input$sc6b2sub1, input$sc6b2sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6b2siz, input$sc6b2col1, input$sc6b2ord1, 
+                      input$sc6b2fsz, input$sc6b2asp, input$sc6b2txt) ) 
+  }) 
+  output$sc6b2oup1.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6b2drX,"_",input$sc6b2drY,"_",  
+                                    input$sc6b2inp1,"_",input$sc6b2inp2,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6b2oup1.h, width = input$sc6b2oup1.w, 
+      plot = scDRcoex(sc6conf, sc6meta, input$sc6b2drX, input$sc6b2drY,  
+                      input$sc6b2inp1, input$sc6b2inp2, input$sc6b2sub1, input$sc6b2sub2, 
+                      "sc6gexpr.h5", sc6gene, 
+                      input$sc6b2siz, input$sc6b2col1, input$sc6b2ord1, 
+                      input$sc6b2fsz, input$sc6b2asp, input$sc6b2txt) ) 
+  }) 
+  output$sc6b2oup2 <- renderPlot({ 
+    scDRcoexLeg(input$sc6b2inp1, input$sc6b2inp2, input$sc6b2col1, input$sc6b2fsz) 
+  }) 
+  output$sc6b2oup2.ui <- renderUI({ 
+    plotOutput("sc6b2oup2", height = "300px") 
+  }) 
+  output$sc6b2oup2.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6b2drX,"_",input$sc6b2drY,"_",  
+                                    input$sc6b2inp1,"_",input$sc6b2inp2,"_leg.pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = 3, width = 4, useDingbats = FALSE, 
+      plot = scDRcoexLeg(input$sc6b2inp1, input$sc6b2inp2, input$sc6b2col1, input$sc6b2fsz) ) 
+  }) 
+  output$sc6b2oup2.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6b2drX,"_",input$sc6b2drY,"_",  
+                                    input$sc6b2inp1,"_",input$sc6b2inp2,"_leg.png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = 3, width = 4, 
+      plot = scDRcoexLeg(input$sc6b2inp1, input$sc6b2inp2, input$sc6b2col1, input$sc6b2fsz) ) 
+  }) 
+  output$sc6b2.dt <- renderDataTable({ 
+    ggData = scDRcoexNum(sc6conf, sc6meta, input$sc6b2inp1, input$sc6b2inp2, 
+                         input$sc6b2sub1, input$sc6b2sub2, "sc6gexpr.h5", sc6gene) 
+    datatable(ggData, rownames = FALSE, extensions = "Buttons", 
+              options = list(pageLength = -1, dom = "tB", buttons = c("copy", "csv", "excel"))) %>% 
+      formatRound(columns = c("percent"), digits = 2) 
+  }) 
+     
+   
+  ### Plots for tab c1 
+  output$sc6c1sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6c1sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6c1sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6c1sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6c1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6c1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6c1sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6c1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6c1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6c1oup <- renderPlot({ 
+    scVioBox(sc6conf, sc6meta, input$sc6c1inp1, input$sc6c1inp2, 
+             input$sc6c1sub1, input$sc6c1sub2, 
+             "sc6gexpr.h5", sc6gene, input$sc6c1typ, input$sc6c1pts, 
+             input$sc6c1siz, input$sc6c1fsz) 
+  }) 
+  output$sc6c1oup.ui <- renderUI({ 
+    plotOutput("sc6c1oup", height = pList2[input$sc6c1psz]) 
+  }) 
+  output$sc6c1oup.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6c1typ,"_",input$sc6c1inp1,"_",  
+                                   input$sc6c1inp2,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6c1oup.h, width = input$sc6c1oup.w, useDingbats = FALSE, 
+      plot = scVioBox(sc6conf, sc6meta, input$sc6c1inp1, input$sc6c1inp2, 
+                      input$sc6c1sub1, input$sc6c1sub2, 
+                      "sc6gexpr.h5", sc6gene, input$sc6c1typ, input$sc6c1pts, 
+                      input$sc6c1siz, input$sc6c1fsz) ) 
+  }) 
+  output$sc6c1oup.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6c1typ,"_",input$sc6c1inp1,"_",  
+                                   input$sc6c1inp2,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6c1oup.h, width = input$sc6c1oup.w, 
+      plot = scVioBox(sc6conf, sc6meta, input$sc6c1inp1, input$sc6c1inp2, 
+                      input$sc6c1sub1, input$sc6c1sub2, 
+                      "sc6gexpr.h5", sc6gene, input$sc6c1typ, input$sc6c1pts, 
+                      input$sc6c1siz, input$sc6c1fsz) ) 
+  }) 
+     
+   
+### Plots for tab c2 
+  output$sc6c2sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6c2sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6c2sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6c2sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6c2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6c2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6c2sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6c2sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6c2sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+output$sc6c2oup <- renderPlot({ 
+  scProp(sc6conf, sc6meta, input$sc6c2inp1, input$sc6c2inp2,  
+         input$sc6c2sub1, input$sc6c2sub2, 
+         input$sc6c2typ, input$sc6c2flp, input$sc6c2fsz) 
+}) 
+output$sc6c2oup.ui <- renderUI({ 
+  plotOutput("sc6c2oup", height = pList2[input$sc6c2psz]) 
+}) 
+output$sc6c2oup.pdf <- downloadHandler( 
+  filename = function() { paste0("sc6",input$sc6c2typ,"_",input$sc6c2inp1,"_",  
+                                 input$sc6c2inp2,".pdf") }, 
+  content = function(file) { ggsave( 
+    file, device = "pdf", height = input$sc6c2oup.h, width = input$sc6c2oup.w, useDingbats = FALSE, 
+    plot = scProp(sc6conf, sc6meta, input$sc6c2inp1, input$sc6c2inp2,  
+                  input$sc6c2sub1, input$sc6c2sub2, 
+                  input$sc6c2typ, input$sc6c2flp, input$sc6c2fsz) ) 
+  }) 
+output$sc6c2oup.png <- downloadHandler( 
+  filename = function() { paste0("sc6",input$sc6c2typ,"_",input$sc6c2inp1,"_",  
+                                 input$sc6c2inp2,".png") }, 
+  content = function(file) { ggsave( 
+    file, device = "png", height = input$sc6c2oup.h, width = input$sc6c2oup.w, 
+    plot = scProp(sc6conf, sc6meta, input$sc6c2inp1, input$sc6c2inp2,  
+                  input$sc6c2sub1, input$sc6c2sub2, 
+                  input$sc6c2typ, input$sc6c2flp, input$sc6c2fsz) ) 
+  }) 
+     
+   
+  ### Plots for tab d1 
+  output$sc6d1sub1.ui <- renderUI({ 
+    sub = strsplit(sc6conf[UI == input$sc6d1sub1]$fID, "\\|")[[1]] 
+    checkboxGroupInput("sc6d1sub2", "Select which cells to show", inline = TRUE, 
+                       choices = sub, selected = sub) 
+  }) 
+  observeEvent(input$sc6d1sub1non, { 
+    sub = strsplit(sc6conf[UI == input$sc6d1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6d1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = NULL, inline = TRUE) 
+  }) 
+  observeEvent(input$sc6d1sub1all, { 
+    sub = strsplit(sc6conf[UI == input$sc6d1sub1]$fID, "\\|")[[1]] 
+    updateCheckboxGroupInput(session, inputId = "sc6d1sub2", label = "Select which cells to show", 
+                             choices = sub, selected = sub, inline = TRUE) 
+  }) 
+  output$sc6d1oupTxt <- renderUI({ 
+    geneList = scGeneList(input$sc6d1inp, sc6gene) 
+    if(nrow(geneList) > 50){ 
+      HTML("More than 50 input genes! Please reduce the gene list!") 
+    } else { 
+      oup = paste0(nrow(geneList[present == TRUE]), " genes OK and will be plotted") 
+      if(nrow(geneList[present == FALSE]) > 0){ 
+        oup = paste0(oup, "<br/>", 
+                     nrow(geneList[present == FALSE]), " genes not found (", 
+                     paste0(geneList[present == FALSE]$gene, collapse = ", "), ")") 
+      } 
+      HTML(oup) 
+    } 
+  }) 
+  output$sc6d1oup <- renderPlot({ 
+    scBubbHeat(sc6conf, sc6meta, input$sc6d1inp, input$sc6d1grp, input$sc6d1plt, 
+               input$sc6d1sub1, input$sc6d1sub2, "sc6gexpr.h5", sc6gene, 
+               input$sc6d1scl, input$sc6d1row, input$sc6d1col, 
+               input$sc6d1cols, input$sc6d1fsz) 
+  }) 
+  output$sc6d1oup.ui <- renderUI({ 
+    plotOutput("sc6d1oup", height = pList3[input$sc6d1psz]) 
+  }) 
+  output$sc6d1oup.pdf <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6d1plt,"_",input$sc6d1grp,".pdf") }, 
+    content = function(file) { ggsave( 
+      file, device = "pdf", height = input$sc6d1oup.h, width = input$sc6d1oup.w, 
+      plot = scBubbHeat(sc6conf, sc6meta, input$sc6d1inp, input$sc6d1grp, input$sc6d1plt, 
+                        input$sc6d1sub1, input$sc6d1sub2, "sc6gexpr.h5", sc6gene, 
+                        input$sc6d1scl, input$sc6d1row, input$sc6d1col, 
+                        input$sc6d1cols, input$sc6d1fsz, save = TRUE) ) 
+  }) 
+  output$sc6d1oup.png <- downloadHandler( 
+    filename = function() { paste0("sc6",input$sc6d1plt,"_",input$sc6d1grp,".png") }, 
+    content = function(file) { ggsave( 
+      file, device = "png", height = input$sc6d1oup.h, width = input$sc6d1oup.w, 
+      plot = scBubbHeat(sc6conf, sc6meta, input$sc6d1inp, input$sc6d1grp, input$sc6d1plt, 
+                        input$sc6d1sub1, input$sc6d1sub2, "sc6gexpr.h5", sc6gene, 
+                        input$sc6d1scl, input$sc6d1row, input$sc6d1col, 
+                        input$sc6d1cols, input$sc6d1fsz, save = TRUE) ) 
   }) 
    
    
