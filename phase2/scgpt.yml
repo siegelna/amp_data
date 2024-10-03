@@ -1,0 +1,26 @@
+name: scgpt
+channels:
+  - conda-forge
+  - bioconda
+  - pytorch
+dependencies:
+  - radian
+  - rpy2  
+  - jupyterlab
+  - r-base     
+  - r-irkernel
+  - r-seurat
+  - r-sceasy
+  - r-dplyr
+  - r-tidyr
+  - r-devtools
+  - bioconductor-celldex
+  - bioconductor-singler
+  - bioconductor-glmgampoi
+  - r-hdf5r
+  # - pytorch
+  # - packaging
+  - python=3.10
+  - numpy<2
+  - scanpy
+  - faiss-cpu # for cpu, from pytorch channel
