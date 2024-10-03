@@ -4,3 +4,4 @@
 phase2/__pycache__/
 phase2/scgpt_models/
 phase2/objects/*.h5ad
+*.h5ad
