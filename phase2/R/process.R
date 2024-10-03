@@ -9,15 +9,16 @@ suppressPackageStartupMessages({
 setwd("/data/nsiegel/projects/amp_data/phase2")
 
 # Load the main object
-load(file=file.path("objects", "02.rda"))
+load(file=file.path("objects", "06.rda"))
 
 # Update metadata
 obj@meta.data$Stim <- obj@meta.data$Type
 obj@meta.data$Tissue_Type <- obj@meta.data$broad.group
 obj@meta.data$Fine_Cell_Type <- obj@meta.data$fine.type
 obj@meta.data$Broad_Cell_Type <- obj@meta.data$broad.type
+obj@meta.data$Donor <- gsub("AMPSLEkid_cells", "Donor",  obj@meta.data$sample)
 
-columns_to_keep <-  c('orig.ident', 'nCount_RNA', 'nFeature_RNA', 'Stim', 'Tissue_Type', 'Fine_Cell_Type', 'Broad_Cell_Type')
+columns_to_keep <-  c('orig.ident', 'nCount_RNA', 'nFeature_RNA', 'Donor', 'Stim', 'Tissue_Type', 'Fine_Cell_Type', 'Broad_Cell_Type')
 obj@meta.data <- obj@meta.data[, columns_to_keep, drop = FALSE]
 
 # Define a function for PCA, UMAP, and clustering
@@ -41,33 +42,33 @@ for (cell_type in cell_types) {
 
 rm(obj)
 
-# Load annotation references
-monaco.ref <- celldex::MonacoImmuneData()
-blueprint.ref <- celldex::BlueprintEncodeData()
+# # Load annotation references
+# monaco.ref <- celldex::MonacoImmuneData()
+# blueprint.ref <- celldex::BlueprintEncodeData()
 
-# Define a function for SingleR annotation
-annotate_and_save <- function(seu, name, reference, label_type, suffix) {
-    print(paste("Annotating", name, "with", label_type))
-    load(file=file.path("objects", paste0(name, ".rda")))
-    sce <- LayerData(seu)
-    annotation <- SingleR(test = sce, assay.type.test = 1, ref = reference, labels = reference[[label_type]])
-    seu@meta.data[[paste0(name, ".", suffix)]] <- annotation$pruned.labels
-    save(seu, file=file.path("objects", paste0(name, suffix, ".rda")))
-    print(paste("Saved", name, suffix, "annotations"))
-}
+# # Define a function for SingleR annotation
+# annotate_and_save <- function(seu, name, reference, label_type, suffix) {
+#     print(paste("Annotating", name, "with", label_type))
+#     load(file=file.path("objects", paste0(name, ".rda")))
+#     sce <- LayerData(seu)
+#     annotation <- SingleR(test = sce, assay.type.test = 1, ref = reference, labels = reference[[label_type]])
+#     seu@meta.data[[paste0(name, ".", suffix)]] <- annotation$pruned.labels
+#     save(seu, file=file.path("objects", paste0(name, suffix, ".rda")))
+#     print(paste("Saved", name, suffix, "annotations"))
+# }
 
-# Annotate and save each cell type
-annotations <- list(
-    Blueprint = "label.main",
-    Monaco = "label.fine"
-)
+# # Annotate and save each cell type
+# annotations <- list(
+#     Blueprint = "label.main",
+#     Monaco = "label.fine"
+# )
 
-for (cell_type in cell_types) {
-    seu_name <- gsub(" ", "", cell_type)
-    for (ann_type in names(annotations)) {
-        annotate_and_save(seu = get(seu_name), name = seu_name, reference = get(paste0(tolower(ann_type), ".ref")), label_type = annotations[[ann_type]], suffix = paste0(tolower(ann_type), "05"))
-    }
-}
+# for (cell_type in cell_types) {
+#     seu_name <- gsub(" ", "", cell_type)
+#     for (ann_type in names(annotations)) {
+#         annotate_and_save(seu = get(seu_name), name = seu_name, reference = get(paste0(tolower(ann_type), ".ref")), label_type = annotations[[ann_type]], suffix = paste0(tolower(ann_type), "05"))
+#     }
+# }
 
 # # Write Shiny files
 # shiny_dir <- "kidney_amp2_sle_scRNAseq/"
