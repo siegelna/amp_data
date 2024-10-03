@@ -1,3 +1,5 @@
 *.rda
 *.rds
 *.h5
+phase2/__pycache__/
+phase2/scgpt_models/
