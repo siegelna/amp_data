@@ -1,0 +1,22 @@
+name: celltypist
+channels:
+ - bioconda
+ - conda-forge
+dependencies:
+# Module
+ - python=3.10
+#  - celltypist=1.6.0
+ - scanpy
+ - matplotlib
+ # Running notebook and code
+ - radian
+ - rpy2  
+ - jupyterlab
+ - r-base     
+ - r-irkernel
+# Analysis
+ - r-seurat
+ - r-sceasy
+ - r-dplyr
+ - r-tidyr
+ - r-devtools
